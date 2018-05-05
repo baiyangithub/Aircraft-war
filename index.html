@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
-	<link rel="stylesheet" href="dahuiji.css" />
+	<link rel="stylesheet" href="aircraft.css" />
 </head>
 <body>
 	<div id="body_main" class="main">
@@ -91,19 +91,20 @@
             //游戏开始 清场
             start_game(){
                 // alert("游戏开始");
-                aircraft.create()
+                aircraft.create().fire(this.hard_status);
 
             }
 
         }
         function Aircraft(){
             this.init();
+            this.bulletList = [];
         }
         Aircraft.prototype = {
             constructor:Aircraft,
             init(){
                 this.ele = document.createElement("div");
-                console.log(this.ele);
+                // console.log(this.ele);
                 this.left = 0;
                 this.top = 0;
                 document.onmousemove = function(event){
@@ -120,23 +121,95 @@
             create(){
                 this.ele.className = "my-warplain";
                 document.body.appendChild(this.ele);
+                return this;
             },
             aircraft_move(pos){
-                var a_left = pos.left;
-                var a_top = pos.top;
-                // console.log(a_left,a_top);
-                
+                //设定边界值
+                if(this.ele.offsetWidth && !this.main_min && !this.main_max){
+                    var main = document.querySelector("#body_main");
+                    this.main_min = main.offsetLeft;
+                    this.main_max = main.offsetLeft + main.offsetWidth - this.ele.offsetWidth;
+                    // console.log("我只需要声明一次");
+                }
+                var a_left = pos.left - this.ele.offsetWidth / 2;
+                var a_top = pos.top - this.ele.offsetHeight / 2;
+                // console.log(this.ele.offsetWidth)
+                //边界检测
+                a_left = a_left <= this.main_min ? this.main_min : a_left;
+                a_left = a_left >= this.main_max ? this.main_max : a_left;
                 this.ele.style.left =a_left + "px";
                 this.ele.style.top =a_top + "px";  
-
+                // console.log(1);
+                //将pos this指向aircraft 让bullet判断位置时 调用
+                this.pos = {
+                    left:a_left,
+                    top:a_top
+                }
+            },
+            fire(status){
+                // console.log(status);
+                var firing_rate;
+                switch(status){
+                    case 0 : firing_rate = 800;break;
+                    case 1 : firing_rate = 300;break;
+                    case 2 : firing_rate = 150;break;
+                    case 3 : firing_rate = 50 ;break; 
+                }
+                var firing_rate_timer = setInterval(function(){
+                    // console.log(1);
+                    //放入创建子弹的函数
+                    new Bullent()
+                }.bind(this),firing_rate)
             }
-
-
         }
         var aircraft = new Aircraft();
-        // function Bullent(){
 
-        // }
+
+        function Bullent(){
+            this.init();
+        }
+        Bullent.prototype = {
+            constructor:Bullent,
+            init(){
+                this.ele = document.createElement("div");
+                this.ele.className = "bullet";
+                // console.log(this.ele.offsetWidth);
+                this.left = aircraft.pos.left;
+                this.top = aircraft.pos.top; 
+                document.body.appendChild(this.ele);   
+                this.left = aircraft.ele.offsetWidth / 2 + this.left - this.ele.offsetWidth / 2;
+                this.top = this.top - this.ele.offsetHeight - 4 ;
+                // console.log(this.ele.offsetHeight);
+     
+                // console.log(this.left,this.top);
+                this.ele.style.left = this.left + "px";
+                this.ele.style.top = this.top + "px";
+                
+                this.bullet_move();
+            },
+            bullet_move(){
+                var speed = 10;
+                var count = 0;
+                this.bullet_move_timer = setInterval(function(){
+                    if(++count == 35){
+                        clearInterval(this.bullet_move_timer);
+                        // this.ele.remove();
+                        console.log("清除子弹！");
+                        this.bullet_die();
+
+                    }                    
+                    this.ele.style.top = this.ele.offsetTop - speed + "px";
+                    // console.log(1);
+                }.bind(this),80);
+            },
+            bullet_die(){
+                this.ele.className = "bullet_die";
+                setTimeout(function(){
+                        this.ele.remove();  
+                    }.bind(this),1000);
+            }
+        }
+
         new Engine();
     </script>
 </body>

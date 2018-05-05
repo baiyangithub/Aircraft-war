@@ -55,8 +55,9 @@ html,body{width:100%; height:100%; overflow: hidden;}
 }
 .bullet{
 	position: absolute;
-	width: 7px; height: 18px;
+	width: 12px; height: 40px;
 	background: url(images/bullet.png) no-repeat;
+	background-size: 100% 100%;
 }
 .bullet_die{
 	position: absolute;
