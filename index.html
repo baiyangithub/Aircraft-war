@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="dahuiji.css" />
+</head>
+<body>
+	<div id="body_main" class="main">
+        <ul id="options" class="options">
+            <li value="1">超级困难</li>
+            <li value="2">非常困难</li>
+            <li value="3">比较困难</li>
+            <li value="4">就选我吧</li>
+        </ul>
+    </div>
+    <script>
+        //
+        function Engine(){
+            this.main_ele = document.getElementById("body_main");
+            this.options = document.getElementById("options");
+            this.hard_ele = this.options.children;
+            //难度
+            // console.log(this.main_ele,this.options,this.hard_ele)
+            this.hard_status = 0;
+
+            this.init();
+        }
+        Engine.prototype = {
+            constructor:Engine,
+            init(){
+                //难度选择 闭包 使用let 加bind
+                for(let i = 0; i < this.hard_ele.length;i++){
+                    this.hard_ele[i].onclick = function(){
+                        this.hard_status = i;
+                        //开场动画
+                        this.start_flash()
+                        .then(function(){
+                            //停止动画 游戏开始
+                            this.start_game();
+                        }.bind(this));
+                    }.bind(this);
+                }
+            }, 
+           
+
+            //开场动画
+            start_flash(){
+                //元素清除 清除页面上的其他东西 
+                this.options.remove();
+                //引入新元素
+                var entranceArray = [
+                    {
+                        className : "loading",
+                        ele : null,
+                    },{
+                        className : "logo",
+                        ele : null,
+                    }
+                ];
+                for(var i = 0;i < entranceArray.length;i++){
+                    entranceArray[i].ele = document.createElement("div");
+                    entranceArray[i].ele.className = entranceArray[i].className;
+                    document.body.appendChild(entranceArray[i].ele);
+                }
+                //飞机向前飞
+                var plane = entranceArray[0].ele;
+                var plane_num = 0;
+                var start_planeTimer = setInterval(function(){
+                    plane.style.background = `url(images/loading${++plane_num % 3 + 1}.png) no-repeat`;
+                    // console.log(plane_num);
+                },600);
+                //幕布动画
+                var curtain_num = 0;
+                var curtain_timer = setInterval(function(){
+                    curtain_num = curtain_num + 5;
+                    this.main_ele.style.backgroundPositionY = curtain_num + "px";
+                }.bind(this),100); 
+
+                return new Promise(function(succ){
+                    setTimeout(function(){
+                        clearInterval(start_planeTimer);
+                        //清场
+                        for(var i = 0; i < entranceArray.length;i++){
+                            entranceArray[i].ele.remove();
+                        }
+                        succ("动画清空完毕")
+                    },1500)
+                })
+            },
+            //游戏开始 清场
+            start_game(){
+                // alert("游戏开始");
+                aircraft.create()
+
+            }
+
+        }
+        function Aircraft(){
+            this.init();
+        }
+        Aircraft.prototype = {
+            constructor:Aircraft,
+            init(){
+                this.ele = document.createElement("div");
+                console.log(this.ele);
+                this.left = 0;
+                this.top = 0;
+                document.onmousemove = function(event){
+                    var e = event || window.event;
+                    var pos = {
+                        left : e.clientX,
+                        top : e.clientY,
+                    }
+                    // console.log(1);
+                    this.aircraft_move(pos);
+                    //move
+                }.bind(this);
+            },
+            create(){
+                this.ele.className = "my-warplain";
+                document.body.appendChild(this.ele);
+            },
+            aircraft_move(pos){
+                var a_left = pos.left;
+                var a_top = pos.top;
+                // console.log(a_left,a_top);
+                
+                this.ele.style.left =a_left + "px";
+                this.ele.style.top =a_top + "px";  
+
+            }
+
+
+        }
+        var aircraft = new Aircraft();
+        // function Bullent(){
+
+        // }
+        new Engine();
+    </script>
+</body>
+</html>
